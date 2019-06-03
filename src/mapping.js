@@ -81,7 +81,7 @@ class Mapping {
 		// and for other browser filter is an object.
 		var filter = {
 			acceptNode: function(node) {
-				if (node.data.trim().length > 0) {
+				if (node.nodeType !== 3 || node.data.trim().length > 0) {
 					return NodeFilter.FILTER_ACCEPT;
 				} else {
 					return NodeFilter.FILTER_REJECT;
@@ -91,7 +91,7 @@ class Mapping {
 		var safeFilter = filter.acceptNode;
 		safeFilter.acceptNode = filter.acceptNode;
 
-		var treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, safeFilter, false);
+		var treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_ALL, safeFilter, false);
 		var node;
 		var result;
 		while ((node = treeWalker.nextNode())) {

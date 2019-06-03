@@ -101,61 +101,75 @@ class Locations {
 			var dist;
 			var pos = 0;
 
-			if (node.textContent.trim().length === 0) {
-				return false; // continue
-			}
+			if (node.textContent.trim().length !== 0) {
 
-			// Start range
-			if (counter == 0) {
-				range = this.createRange();
-				range.startContainer = node;
-				range.startOffset = 0;
-			}
-
-			dist = _break - counter;
-
-			// Node is smaller than a break,
-			// skip over it
-			if(dist > len){
-				counter += len;
-				pos = len;
-			}
-
-
-			while (pos < len) {
-				dist = _break - counter;
-
-				if (counter === 0) {
-					// Start new range
-					pos += 1;
+				// Start range
+				if (counter == 0) {
 					range = this.createRange();
 					range.startContainer = node;
-					range.startOffset = pos;
+					range.startOffset = 0;
 				}
 
-				// pos += dist;
+				dist = _break - counter;
 
-				// Gone over
-				if(pos + dist >= len){
-					// Continue counter for next node
-					counter += len - pos;
-					// break
+				// Node is smaller than a break,
+				// skip over it
+				if (dist > len) {
+					counter += len;
 					pos = len;
-				// At End
-				} else {
-					// Advance pos
-					pos += dist;
-
-					// End the previous range
-					range.endContainer = node;
-					range.endOffset = pos;
-					// cfi = section.cfiFromRange(range);
-					let cfi = new EpubCFI(range, cfiBase).toString();
-					locations.push(cfi);
-					counter = 0;
 				}
+
+
+				while (pos < len) {
+					dist = _break - counter;
+
+					if (counter === 0) {
+						// Start new range
+						pos += 1;
+						range = this.createRange();
+						range.startContainer = node;
+						range.startOffset = pos;
+					}
+
+					// pos += dist;
+
+					// Gone over
+					if (pos + dist >= len) {
+						// Continue counter for next node
+						counter += len - pos;
+						// break
+						pos = len;
+						// At End
+					} else {
+						// Advance pos
+						pos += dist;
+
+						// End the previous range
+						range.endContainer = node;
+						range.endOffset = pos;
+						// cfi = section.cfiFromRange(range);
+						let cfi = new EpubCFI(range, cfiBase).toString();
+						locations.push(cfi);
+						counter = 0;
+					}
+				}
+				prev = node;
 			}
-			prev = node;
+			let imageNode = this.imageNode(node);
+			if (imageNode) {
+				// Start range
+				if (counter == 0) {
+					range = this.createRange();
+					range.startContainer = imageNode;
+					range.startOffset = 0;
+				}
+
+				range.endContainer = imageNode;
+				range.endOffset = 0;
+				let cfi = new EpubCFI(range, cfiBase).toString();
+				locations.push(cfi);
+				counter = 0;
+			}
 		};
 
 		sprint(body, parser.bind(this));
@@ -170,6 +184,16 @@ class Locations {
 		}
 
 		return locations;
+	}
+
+	imageNode(node) {
+	    if (node.nextSibling != null)
+	    	if (node.nextSibling.nodeName === "IMG") {
+				return node.nextSibling;
+			} else if (node.nextSibling.firstChild != null && node.nextSibling.firstChild.nodeName.toLowerCase() === 'img') {
+            return node.nextSibling.firstChild;
+        }
+	    return null;
 	}
 
 	/**

@@ -466,7 +466,7 @@ class EpubCFI {
 
 		}
 
-		if (offset != null && offset > 0) {
+		if (offset != null && offset >= 0) {
 
 			segment.terminal.offset = offset;
 

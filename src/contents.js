@@ -607,6 +607,9 @@ class Contents {
 						}
 					} else {
 						position = range.getBoundingClientRect();
+						if (position.left === 0) {
+							position = range.startContainer.parentElement.getBoundingClientRect();
+						}
 					}
 				}
 			}
